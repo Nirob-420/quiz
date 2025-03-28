@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NB quiz</title>
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    /* Container & Button Styles */
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      margin-bottom: 20px;
+      animation: fadeIn 0.8s ease;
+    }
+    .role-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background: #4a5568;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .role-btn:hover {
+      background: #2d3748;
+      transform: scale(1.02);
+    }
+    .hidden { display: none; }
+    
+    /* Notification & Timer */
+    .notification {
+      background: #edf2f7;
+      padding: 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      animation: slideDown 0.5s ease;
+    }
+    .timer {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: right;
+    }
+    
+    /* Question & Answer Card Styles */
+    .question-card {
+      background: white;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.6s ease;
+    }
+    .answer-option {
+      padding: 10px;
+      margin: 5px 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .answer-option:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    .answer-option.selected {
+      background: #ebf8ff;
+      border-color: #3182ce;
+      transform: scale(1.02);
+    }
+    /* After submission styles */
+    .answer-option.correct {
+      background: #c6f6d5 !important;
+      border-color: green !important;
+    }
+    .answer-option.wrong {
+      background: #fed7d7 !important;
+      border-color: red !important;
+    }
+    
+    /* Admin Remove Button */
+    .remove-btn {
+      background: #f56565;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      float: right;
+      transition: background 0.3s ease;
+    }
+    .remove-btn:hover { background: #c53030; }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { transform: translateX(-50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Section (also shows notifications) -->
+  <div class="container" id="loginSection">
+    <h2 style="text-align: center;">Quiz Portal</h2>
+    <button class="role-btn" onclick="showCandidateForm()">Candidate Login</button>
+    <button class="role-btn" onclick="promptAdminLogin()">Admin Panel</button>
+    <div id="notificationArea"></div>
+  </div>
+
+  <!-- Candidate Details Section -->
+  <div class="container hidden" id="candidateSection">
+    <h2>Candidate Details</h2>
+    <input type="text" placeholder="Name" id="name" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <input type="text" placeholder="Roll Number" id="roll" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <button class="role-btn" onclick="startExam()">Start Exam</button>
+  </div>
+
+  <!-- Candidate Exam Section -->
+  <div class="container hidden" id="examSection">
+    <div class="timer" id="timer">Time Left: 60s</div>
+    <h2>Exam</h2>
+    <div id="questionsContainer"></div>
+    <button class="role-btn" onclick="submitExam()">Submit Answers</button>
+  </div>
+
+  <!-- Admin Panel Section -->
+  <div class="container hidden" id="adminSection">
+    <h2>Admin Panel</h2>
+    <input type="text" id="newQuestion" placeholder="Enter question" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <input type="text" id="option1" placeholder="Option 1" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <input type="text" id="option2" placeholder="Option 2" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <input type="text" id="option3" placeholder="Option 3" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <input type="text" id="option4" placeholder="Option 4" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <input type="number" id="correctOption" placeholder="Correct option (0-3)" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <button class="role-btn" onclick="addQuestion()">Add Question</button>
+    <h3>Stored Questions</h3>
+    <div id="adminQuestions"></div>
+  </div>
+
+  <script>
+    // Global Variables
+    const adminPassword = "admin123"; // Set your own admin password here
+    let approvedQuestions = [];         // Array to store approved questions
+    let candidateAnswers = [];          // Array to store candidate answers
+    let candidateName = "";             // Store candidate name
+    const examTime = 60;                // exam time in seconds
+    let timeLeft = examTime;
+    let timerInterval;
+
+    // On page load, load questions from localStorage (if any)
+    window.onload = function() {
+      const stored = localStorage.getItem('approvedQuestions');
+      if (stored) {
+        approvedQuestions = JSON.parse(stored);
+      }
+      renderAdminQuestions();
+    };
+
+    // Save approvedQuestions to localStorage
+    function saveQuestions() {
+      localStorage.setItem('approvedQuestions', JSON.stringify(approvedQuestions));
+    }
+
+    // Show Candidate Details form
+    function showCandidateForm() {
+      hideAll();
+      document.getElementById('candidateSection').classList.remove('hidden');
+    }
+
+    // Prompt for Admin Password and show Admin Panel if correct
+    function promptAdminLogin() {
+      let password = prompt("Enter Admin Password:");
+      if (password === adminPassword) {
+        showAdminPanel();
+      } else {
+        alert("Incorrect password!");
+      }
+    }
+
+    // Show Admin Panel
+    function showAdminPanel() {
+      hideAll();
+      document.getElementById('adminSection').classList.remove('hidden');
+      renderAdminQuestions();
+    }
+
+    // Start Exam: Capture candidate name, start timer, and show exam panel
+    function startExam() {
+      candidateName = document.getElementById('name').value.trim();
+      if (candidateName === "") {
+        alert("Please enter your name.");
+        return;
+      }
+      hideAll();
+      document.getElementById('examSection').classList.remove('hidden');
+      renderQuestions();
+      startTimer();
+    }
+
+    // Start exam countdown timer
+    function startTimer() {
+      timeLeft = examTime;
+      document.getElementById('timer').textContent = `Time Left: ${timeLeft}s`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = `Time Left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          submitExam(); // auto-submit exam when time runs out
+        }
+      }, 1000);
+    }
+
+    // Add Question (stored persistently and immediately available to candidates)
+    function addQuestion() {
+      const questionText = document.getElementById('newQuestion').value.trim();
+      const option1 = document.getElementById('option1').value.trim();
+      const option2 = document.getElementById('option2').value.trim();
+      const option3 = document.getElementById('option3').value.trim();
+      const option4 = document.getElementById('option4').value.trim();
+      const correctAnswer = parseInt(document.getElementById('correctOption').value);
+
+      if (
+        questionText &&
+        option1 &&
+        option2 &&
+        option3 &&
+        option4 &&
+        !isNaN(correctAnswer) &&
+        correctAnswer >= 0 &&
+        correctAnswer <= 3
+      ) {
+        let newQ = {
+          question: questionText,
+          options: [option1, option2, option3, option4],
+          correctAnswer: correctAnswer
+        };
+        approvedQuestions.push(newQ);
+        saveQuestions();
+        alert("Question added successfully!");
+        // Clear input fields
+        document.getElementById('newQuestion').value = "";
+        document.getElementById('option1').value = "";
+        document.getElementById('option2').value = "";
+        document.getElementById('option3').value = "";
+        document.getElementById('option4').value = "";
+        document.getElementById('correctOption').value = "";
+        renderAdminQuestions();
+        // Log out admin (return to login panel)
+        hideAll();
+        document.getElementById('loginSection').classList.remove('hidden');
+      } else {
+        alert("Please fill in all fields correctly.");
+      }
+    }
+
+    // Render Exam Questions in the Candidate Exam Panel
+    function renderQuestions() {
+      candidateAnswers = new Array(approvedQuestions.length).fill(null);
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = approvedQuestions.map((q, index) => `
+        <div class="question-card">
+          <h3>${index + 1}. ${q.question}</h3>
+          ${q.options.map((opt, i) => `
+            <div class="answer-option" onclick="selectAnswer(${index}, ${i}, this)">${opt}</div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    // Record Candidate's Selected Answer and apply animation styling
+    function selectAnswer(qIndex, aIndex, element) {
+      candidateAnswers[qIndex] = aIndex;
+      // Remove 'selected' class from all options in this question
+      const options = element.parentElement.querySelectorAll('.answer-option');
+      options.forEach(opt => opt.classList.remove('selected'));
+      // Add 'selected' class to the chosen option
+      element.classList.add('selected');
+    }
+
+    // Submit Exam: Calculate score, highlight answers, notify admin, then return to login panel
+    function submitExam() {
+      clearInterval(timerInterval);
+      let score = 0;
+      const questionCards = document.querySelectorAll('.question-card');
+      approvedQuestions.forEach((q, index) => {
+        const options = questionCards[index].querySelectorAll('.answer-option');
+        options.forEach((opt, i) => {
+          // Mark correct answer with green border
+          if(i === q.correctAnswer) {
+            opt.classList.add('correct');
+          }
+          // Mark candidate's selection as wrong if it doesn't match the correct answer
+          if(candidateAnswers[index] === i && i !== q.correctAnswer) {
+            opt.classList.add('wrong');
+          }
+        });
+        if(candidateAnswers[index] === q.correctAnswer) score++;
+      });
+      notifyAdmin(candidateName, score);
+      alert(`Exam submitted! You scored ${score} out of ${approvedQuestions.length}`);
+      // After a short delay, return to login panel
+      setTimeout(() => {
+        hideAll();
+        document.getElementById('loginSection').classList.remove('hidden');
+      }, 3000);
+    }
+
+    // Display a notification in the login panel for admin review
+    function notifyAdmin(name, score) {
+      const notificationArea = document.getElementById('notificationArea');
+      const notification = document.createElement('div');
+      notification.className = "notification";
+      notification.textContent = `Candidate ${name} scored ${score} out of ${approvedQuestions.length}`;
+      // Prepend notification (latest first)
+      notificationArea.prepend(notification);
+    }
+
+    // Render stored questions in Admin Panel with a remove option
+    function renderAdminQuestions() {
+      const container = document.getElementById('adminQuestions');
+      container.innerHTML = approvedQuestions.map((q, index) => `
+        <div class="question-card">
+          <button class="remove-btn" onclick="removeQuestion(${index})">Remove</button>
+          <h3>${index + 1}. ${q.question}</h3>
+          ${q.options.map(opt => `<p>${opt}</p>`).join('')}
+        </div>
+      `).join('');
+    }
+
+    // Remove question from storage
+    function removeQuestion(index) {
+      if (confirm("Are you sure you want to remove this question?")) {
+        approvedQuestions.splice(index, 1);
+        saveQuestions();
+        renderAdminQuestions();
+      }
+    }
+
+    // Helper function to hide all panels
+    function hideAll() {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('candidateSection').classList.add('hidden');
+      document.getElementById('examSection').classList.add('hidden');
+      document.getElementById('adminSection').classList.add('hidden');
+    }
+  </script>
+
+</body>
+  </html>
