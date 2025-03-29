@@ -3,377 +3,572 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NB quiz</title>
+  <title>NB Quiz - Professional Edition</title>
+  <!-- Include Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"   
+        integrity="sha512-papNM9xK0t4MbyXsnfEExSXX/92wLzxi+0kMeDCRqGnyqW6Jea6VU5QUwF4B7kS02T3C3jYJw+jH0P3W+T3QGA=="   
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    /* Global Styles */
+    :root {
+      --primary-color: #4a90e2;
+      --secondary-color: #50e3c2;
+      --accent-color: #9013fe;
+      --light-color: #f7f7f7;
+      --dark-color: #333;
+      --card-bg: rgba(255, 255, 255, 0.97);
+      --input-border: #ccc;
+      --shadow-light: rgba(0, 0, 0, 0.1);
+      --shadow-heavy: rgba(0, 0, 0, 0.25);
+      --topic-general: #ff6f61;
+      --topic-science: #6b5b95;
+      --topic-math: #88b04b;
+      --topic-history: #f7cac9;
+    }
+    body {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--dark-color);
+      overflow-x: hidden;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .dark-mode {
+      --primary-color: #333;
+      --secondary-color: #555;
+      --accent-color: #888;
+      --light-color: #222;
+      --dark-color: #eee;
+      --card-bg: #444;
+      --input-border: #666;
+    }
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
+    /* Navigation Bar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--light-color);
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px var(--shadow-light);
     }
-    /* Container & Button Styles */
+    .navbar a {
+      color: var(--dark-color);
+      text-decoration: none;
+      margin: 0 10px;
+      font-size: 1.1rem;
+    }
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+    /* Animations */
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInLeft {
+      0% { opacity: 0; transform: translateX(-50px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
     .container {
       max-width: 800px;
-      margin: auto;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      margin: 30px auto;
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 12px 30px var(--shadow-heavy);
+      animation: fadeInUp 0.8s ease forwards;
+      position: relative;
+      overflow: hidden;
+    }
+    .hidden { display: none; }
+    .container::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, transparent 20%, var(--accent-color) 80%);
+      opacity: 0.05;
+      animation: pulse 4s infinite ease-in-out;
+      pointer-events: none;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: var(--light-color);
+      border-radius: 10px;
+      box-shadow: 0 6px 20px var(--shadow-light);
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+    .logo:hover { transform: scale(1.05); }
+    .theme-switcher {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .logo a { text-decoration: none; color: var(--dark-color); }
+    .logo h1 {
+      font-size: 3rem;
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .logo p {
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--dark-color);
+      opacity: 0.8;
+    }
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 15px;
       margin-bottom: 20px;
-      animation: fadeIn 0.8s ease;
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      outline: none;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 8px var(--primary-color);
     }
     .role-btn {
       width: 100%;
-      padding: 15px;
+      padding: 18px;
       border: none;
       border-radius: 10px;
-      background: #4a5568;
-      color: white;
-      font-size: 18px;
+      background: var(--primary-color);
+      color: #fff;
+      font-size: 20px;
       cursor: pointer;
-      margin: 10px 0;
+      margin: 15px 0;
       transition: background 0.3s ease, transform 0.2s ease;
+      animation: slideInLeft 0.8s ease forwards;
     }
-    .role-btn:hover {
-      background: #2d3748;
-      transform: scale(1.02);
-    }
-    .hidden { display: none; }
-    
-    /* Notification & Timer */
-    .notification {
-      background: #edf2f7;
-      padding: 10px;
-      border: 1px solid #cbd5e0;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      animation: slideDown 0.5s ease;
-    }
+    .role-btn:hover { background: var(--accent-color); transform: scale(1.03); }
     .timer {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 10px;
+      font-size: 20px;
+      font-weight: 600;
       text-align: right;
+      margin-bottom: 20px;
+      color: var(--dark-color);
+      animation: slideInLeft 0.8s ease forwards;
     }
-    
-    /* Question & Answer Card Styles */
-    .question-card {
-      background: white;
-      margin: 10px 0;
+    .progress-bar {
+      width: 100%;
+      background: #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress {
+      height: 20px;
+      width: 0%;
+      background: var(--primary-color);
+      transition: width 0.3s ease;
+    }
+    .notification {
+      background: #e8f4fd;
+      border: 1px solid #b3d7ff;
+      border-radius: 8px;
       padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      animation: slideIn 0.6s ease;
+      margin-bottom: 20px;
+      color: var(--dark-color);
+      animation: fadeInUp 0.8s ease forwards;
+    }
+    .question-card {
+      background: #fefefe;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      padding: 25px;
+      box-shadow: 0 6px 18px var(--shadow-light);
+      animation: fadeInUp 0.8s ease forwards;
+    }
+    .question-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .question-header i {
+      font-size: 1.4rem;
+      margin-right: 10px;
+    }
+    .question-header .difficulty {
+      margin-left: auto;
+    }
+    .question-card h3 {
+      font-size: 1.5rem;
+      color: var(--primary-color);
     }
     .answer-option {
-      padding: 10px;
-      margin: 5px 0;
-      border: 2px solid #e2e8f0;
-      border-radius: 5px;
+      padding: 15px;
+      margin: 10px 0;
+      border: 2px solid #eee;
+      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
+      background: #fff;
+      font-size: 1.1rem;
     }
     .answer-option:hover {
-      border-color: #667eea;
-      background: #f0f4ff;
+      border-color: var(--primary-color);
+      background: #f0f8ff;
     }
     .answer-option.selected {
-      background: #ebf8ff;
-      border-color: #3182ce;
+      background: #e0f7fa;
+      border-color: var(--accent-color);
       transform: scale(1.02);
     }
-    /* After submission styles */
     .answer-option.correct {
-      background: #c6f6d5 !important;
-      border-color: green !important;
+      background: #d4edda !important;
+      border-color: #28a745 !important;
     }
     .answer-option.wrong {
-      background: #fed7d7 !important;
-      border-color: red !important;
+      background: #f8d7da !important;
+      border-color: #dc3545 !important;
     }
-    
-    /* Admin Remove Button */
-    .remove-btn {
-      background: #f56565;
-      color: white;
+    .remove-btn, .edit-btn {
+      background: #dc3545;
+      color: #fff;
       border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 8px 12px;
+      border-radius: 6px;
       cursor: pointer;
-      float: right;
+      margin-left: 5px;
       transition: background 0.3s ease;
+      font-size: 0.9rem;
     }
-    .remove-btn:hover { background: #c53030; }
-    
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .edit-btn {
+      background: #007bff;
     }
-    @keyframes slideIn {
-      from { transform: translateX(-50px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+    .remove-btn:hover { background: #c82333; }
+    .edit-btn:hover { background: #0069d9; }
+    .leaderboard {
+      background: #f1f1f1;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px var(--shadow-light);
+      margin-top: 30px;
+      animation: fadeInUp 0.8s ease forwards;
     }
-    @keyframes slideDown {
-      from { transform: translateY(-20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    .leaderboard h3 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary-color);
+      font-size: 1.8rem;
+    }
+    .leaderboard-item {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      font-size: 1.1rem;
+      color: var(--dark-color);
+    }
+    .leaderboard-item:last-child { border-bottom: none; }
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .role-btn { font-size: 18px; padding: 15px; }
+      .logo h1 { font-size: 2.5rem; }
     }
   </style>
 </head>
 <body>
-
-  <!-- Login Section (also shows notifications) -->
+  <!-- Navigation Bar -->
+  <div class="navbar">
+    <div>
+      <a href="#" onclick="goHome()">Home</a>
+      <a href="#" onclick="showCandidateForm()">Candidate</a>
+      <a href="#" onclick="promptAdminLogin()">Admin</a>
+    </div>
+    <div>
+      <a href="#" onclick="retakeExam()">Retake Exam</a>
+      <a href="#" onclick="printResults()">Print Result</a>
+    </div>
+  </div>
+    
+  <!-- Logo Section with Theme Switcher -->
+  <div class="logo">
+    <div class="theme-switcher" onclick="toggleTheme()">
+      <i class="fa-solid fa-adjust"></i>
+    </div>
+    <a href="https://nirob120.netlify.app/" target="_blank">
+      <h1>NB Codes</h1>
+      <p>Creator NIROB</p>
+    </a>
+  </div>
+    
+  <!-- Login Section -->
   <div class="container" id="loginSection">
-    <h2 style="text-align: center;">Quiz Portal</h2>
+    <h2 style="text-align: center; font-size:2rem;">Quiz Portal</h2>
     <button class="role-btn" onclick="showCandidateForm()">Candidate Login</button>
     <button class="role-btn" onclick="promptAdminLogin()">Admin Panel</button>
     <div id="notificationArea"></div>
+    <div id="leaderboardSection" class="leaderboard"></div>
   </div>
-
+    
   <!-- Candidate Details Section -->
   <div class="container hidden" id="candidateSection">
-    <h2>Candidate Details</h2>
-    <input type="text" placeholder="Name" id="name" style="width:100%; padding:10px; margin-bottom:10px;" />
-    <input type="text" placeholder="Roll Number" id="roll" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <h2 style="text-align:center;">Candidate Details</h2>
+    <input type="text" placeholder="Name" id="name" />
+    <input type="text" placeholder="Roll Number" id="roll" />
+    <select id="candidateTopic">
+      <option value="All">All Topics</option>
+      <option value="General">General</option>
+      <option value="Science">Science</option>
+      <option value="Math">Math</option>
+      <option value="History">History</option>
+    </select>
+    <label>
+      <input type="checkbox" id="randomizeOrder" /> Randomize Question Order
+    </label>
     <button class="role-btn" onclick="startExam()">Start Exam</button>
   </div>
-
+    
   <!-- Candidate Exam Section -->
   <div class="container hidden" id="examSection">
     <div class="timer" id="timer">Time Left: 60s</div>
-    <h2>Exam</h2>
+    <button class="role-btn" onclick="pauseTimer()" id="pauseBtn">Pause Timer</button>
+    <button class="role-btn hidden" onclick="resumeTimer()" id="resumeBtn">Resume Timer</button>
+    <!-- Progress Bar -->
+    <div class="progress-bar"><div class="progress" id="progress"></div></div>
+    <h2 style="text-align:center;">Exam</h2>
     <div id="questionsContainer"></div>
     <button class="role-btn" onclick="submitExam()">Submit Answers</button>
   </div>
-
+    
+  <!-- Review Section -->
+  <div class="container hidden" id="reviewSection">
+    <h2 style="text-align:center;">Review Answers</h2>
+    <div id="reviewContainer"></div>
+    <button class="role-btn" onclick="retakeExam()">Retake Quiz</button>
+    <button class="role-btn" onclick="goHome()">Go to Home</button>
+  </div>
+    
   <!-- Admin Panel Section -->
   <div class="container hidden" id="adminSection">
-    <h2>Admin Panel</h2>
-    <input type="text" id="newQuestion" placeholder="Enter question" style="width:100%; padding:10px; margin-bottom:10px;" />
-    <input type="text" id="option1" placeholder="Option 1" style="width:100%; padding:10px; margin-bottom:10px;" />
-    <input type="text" id="option2" placeholder="Option 2" style="width:100%; padding:10px; margin-bottom:10px;" />
-    <input type="text" id="option3" placeholder="Option 3" style="width:100%; padding:10px; margin-bottom:10px;" />
-    <input type="text" id="option4" placeholder="Option 4" style="width:100%; padding:10px; margin-bottom:10px;" />
-    <input type="number" id="correctOption" placeholder="Correct option (0-3)" style="width:100%; padding:10px; margin-bottom:10px;" />
+    <h2 style="text-align:center;">Admin Panel</h2>
+    <!-- Single Question Entry -->
+    <input type="text" id="newQuestion" placeholder="Enter question" />
+    <input type="text" id="option1" placeholder="Option 1" />
+    <input type="text" id="option2" placeholder="Option 2" />
+    <input type="text" id="option3" placeholder="Option 3" />
+    <input type="text" id="option4" placeholder="Option 4" />
+    <select id="questionTopic">
+      <option value="General">General</option>
+      <option value="Science">Science</option>
+      <option value="Math">Math</option>
+      <option value="History">History</option>
+    </select>
+    <select id="questionDifficulty">
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Hard">Hard</option>
+    </select>
+    <input type="number" id="correctOption" placeholder="Correct option (0-3)" />
     <button class="role-btn" onclick="addQuestion()">Add Question</button>
-    <h3>Stored Questions</h3>
+    <button class="role-btn" onclick="generateAIQuestion()">Generate AI Question</button>
+    <button class="role-btn" onclick="generateBulkAIQuestions()">Generate Bulk AI Questions</button>
+    <button class="role-btn" onclick="clearAllQuestions()">Clear All Questions</button>
+    
+    <!-- Bulk Question Entry Section -->
+    <h3 style="text-align:center; margin-top:20px;">Bulk Question Entry</h3>
+    <textarea id="bulkQuestions" rows="6" placeholder="Enter questions in the format: 
+Question | Option1 | Option2 | Option3 | Option4 | CorrectIndex | Topic | Difficulty
+One question per line."></textarea>
+    <button class="role-btn" onclick="addBulkQuestions()">Add Bulk Questions</button>
+    
+    <!-- Export and Search Features -->
+    <h3 style="text-align:center; margin-top:20px;">Stored Questions (<span id="totalCount">0</span> total)</h3>
+    <input type="text" id="searchQuestion" placeholder="Search questions..." onkeyup="searchQuestions()" />
+    <button class="role-btn" onclick="exportQuestions()">Export Questions (JSON)</button>
+    <button class="role-btn" onclick="uploadQuestions()">Upload Questions (JSON)</button>
+    <input type="file" id="uploadFile" style="display:none;" accept="application/json" onchange="handleFileUpload(event)" />
     <div id="adminQuestions"></div>
+    
+    <!-- Candidate Score History and CSV Export -->
+    <h3 style="text-align:center; margin-top:20px;">Candidate Score History</h3>
+    <div id="scoreHistory"></div>
+    <button class="role-btn" onclick="clearScoreHistory()">Clear Score History</button>
+    <button class="role-btn" onclick="downloadScoreHistoryCSV()">Download Score History (CSV)</button>
   </div>
-
+    
   <script>
-    // Global Variables
-    const adminPassword = "admin123"; // Set your own admin password here
-    let approvedQuestions = [];         // Array to store approved questions
-    let candidateAnswers = [];          // Array to store candidate answers
-    let candidateName = "";             // Store candidate name
-    const examTime = 60;                // exam time in seconds
+    // Global Variables and Setup
+    const adminPassword = "admin123";
+    let approvedQuestions = [];
+    let candidateAnswers = [];
+    let candidateName = "";
+    const examTime = 60;
     let timeLeft = examTime;
     let timerInterval;
-
-    // On page load, load questions from localStorage (if any)
+    let isPaused = false;
+    
     window.onload = function() {
       const stored = localStorage.getItem('approvedQuestions');
-      if (stored) {
-        approvedQuestions = JSON.parse(stored);
+      if (stored) { approvedQuestions = JSON.parse(stored); }
+      // If exam progress exists, auto load candidate answers
+      const savedAnswers = localStorage.getItem('candidateAnswers');
+      if(savedAnswers) {
+        candidateAnswers = JSON.parse(savedAnswers);
       }
       renderAdminQuestions();
+      renderScoreHistory();
+      renderLeaderboard();
     };
-
-    // Save approvedQuestions to localStorage
+      
+    function hideAll() {
+      document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+    }
+    function goHome() {
+      hideAll();
+      document.getElementById('loginSection').classList.remove('hidden');
+    }
     function saveQuestions() {
       localStorage.setItem('approvedQuestions', JSON.stringify(approvedQuestions));
     }
-
-    // Show Candidate Details form
+    function saveScoreHistory(scoreEntry) {
+      let history = JSON.parse(localStorage.getItem('scoreHistory')) || [];
+      history.push(scoreEntry);
+      localStorage.setItem('scoreHistory', JSON.stringify(history));
+      renderScoreHistory();
+      renderLeaderboard();
+    }
+    function renderScoreHistory() {
+      const container = document.getElementById('scoreHistory');
+      let history = JSON.parse(localStorage.getItem('scoreHistory')) || [];
+      if(history.length === 0) {
+        container.innerHTML = "<p>No score history available.</p>";
+        return;
+      }
+      container.innerHTML = history.map(entry => `
+        <div class="notification">
+          Candidate ${entry.name} scored ${entry.score} out of ${approvedQuestions.length} on ${new Date(entry.date).toLocaleString()}
+        </div>
+      `).join('');
+    }
+    function renderLeaderboard() {
+      const leaderboardContainer = document.getElementById('leaderboardSection');
+      let history = JSON.parse(localStorage.getItem('scoreHistory')) || [];
+      if(history.length === 0) {
+        leaderboardContainer.innerHTML = "<h3>Leaderboard</h3><p>No scores yet.</p>";
+        return;
+      }
+      history.sort((a, b) => b.score - a.score || new Date(b.date) - new Date(a.date));
+      let topFive = history.slice(0, 5);
+      leaderboardContainer.innerHTML = "<h3>Leaderboard</h3>" + topFive.map((entry, idx) => `
+        <div class="leaderboard-item">
+          ${idx + 1}. ${entry.name} - ${entry.score}/${approvedQuestions.length}
+        </div>
+      `).join('');
+    }
+    function clearScoreHistory() {
+      if(confirm("Are you sure you want to clear all score history?")) {
+        localStorage.removeItem('scoreHistory');
+        renderScoreHistory();
+        renderLeaderboard();
+      }
+    }
+      
     function showCandidateForm() {
       hideAll();
       document.getElementById('candidateSection').classList.remove('hidden');
     }
-
-    // Prompt for Admin Password and show Admin Panel if correct
     function promptAdminLogin() {
       let password = prompt("Enter Admin Password:");
-      if (password === adminPassword) {
-        showAdminPanel();
-      } else {
-        alert("Incorrect password!");
-      }
+      if (password === adminPassword) { showAdminPanel(); }
+      else { alert("Incorrect password!"); }
     }
-
-    // Show Admin Panel
     function showAdminPanel() {
       hideAll();
       document.getElementById('adminSection').classList.remove('hidden');
-      renderAdminQuestions();
+      updateTotalCount();
     }
-
-    // Start Exam: Capture candidate name, start timer, and show exam panel
+    function updateTotalCount() {
+      document.getElementById('totalCount').textContent = approvedQuestions.length;
+    }
     function startExam() {
       candidateName = document.getElementById('name').value.trim();
-      if (candidateName === "") {
-        alert("Please enter your name.");
-        return;
-      }
+      if (candidateName === "") { alert("Please enter your name."); return; }
       hideAll();
       document.getElementById('examSection').classList.remove('hidden');
       renderQuestions();
       startTimer();
     }
-
-    // Start exam countdown timer
     function startTimer() {
       timeLeft = examTime;
+      isPaused = false;
       document.getElementById('timer').textContent = `Time Left: ${timeLeft}s`;
       timerInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById('timer').textContent = `Time Left: ${timeLeft}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          submitExam(); // auto-submit exam when time runs out
+        if(!isPaused) {
+          timeLeft--;
+          document.getElementById('timer').textContent = `Time Left: ${timeLeft}s`;
+          updateProgress();
+          if(timeLeft <= 10 && timeLeft > 0) {
+            playBeep();
+          }
+          if (timeLeft <= 0) { clearInterval(timerInterval); submitExam(); }
+          // Auto-save candidate answers
+          localStorage.setItem('candidateAnswers', JSON.stringify(candidateAnswers));
         }
       }, 1000);
     }
-
-    // Add Question (stored persistently and immediately available to candidates)
-    function addQuestion() {
-      const questionText = document.getElementById('newQuestion').value.trim();
-      const option1 = document.getElementById('option1').value.trim();
-      const option2 = document.getElementById('option2').value.trim();
-      const option3 = document.getElementById('option3').value.trim();
-      const option4 = document.getElementById('option4').value.trim();
-      const correctAnswer = parseInt(document.getElementById('correctOption').value);
-
-      if (
-        questionText &&
-        option1 &&
-        option2 &&
-        option3 &&
-        option4 &&
-        !isNaN(correctAnswer) &&
-        correctAnswer >= 0 &&
-        correctAnswer <= 3
-      ) {
-        let newQ = {
-          question: questionText,
-          options: [option1, option2, option3, option4],
-          correctAnswer: correctAnswer
-        };
-        approvedQuestions.push(newQ);
-        saveQuestions();
-        alert("Question added successfully!");
-        // Clear input fields
-        document.getElementById('newQuestion').value = "";
-        document.getElementById('option1').value = "";
-        document.getElementById('option2').value = "";
-        document.getElementById('option3').value = "";
-        document.getElementById('option4').value = "";
-        document.getElementById('correctOption').value = "";
-        renderAdminQuestions();
-        // Log out admin (return to login panel)
-        hideAll();
-        document.getElementById('loginSection').classList.remove('hidden');
-      } else {
-        alert("Please fill in all fields correctly.");
+    function pauseTimer() {
+      isPaused = true;
+      document.getElementById('pauseBtn').classList.add('hidden');
+      document.getElementById('resumeBtn').classList.remove('hidden');
+    }
+    function resumeTimer() {
+      isPaused = false;
+      document.getElementById('resumeBtn').classList.add('hidden');
+      document.getElementById('pauseBtn').classList.remove('hidden');
+    }
+    function updateProgress() {
+      // Update progress bar based on number of answered questions
+      let total = candidateAnswers.length;
+      let answered = candidateAnswers.filter(ans => ans !== null).length;
+      let percent = (answered / total) * 100;
+      document.getElementById('progress').style.width = percent + "%";
+    }
+    function playBeep() {
+      // Simple beep using Audio API (ensure browser support)
+      const beep = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQgAAAAA");
+      beep.play();
+    }
+      
+    function getTopicIcon(topic) {
+      switch(topic.toLowerCase()) {
+        case "math": return '<i class="fa-solid fa-calculator" style="color: var(--topic-math);"></i>';
+        case "science": return '<i class="fa-solid fa-flask" style="color: var(--topic-science);"></i>';
+        case "history": return '<i class="fa-solid fa-landmark" style="color: var(--topic-history);"></i>';
+        default: return '<i class="fa-solid fa-globe" style="color: var(--topic-general);"></i>';
       }
     }
-
-    // Render Exam Questions in the Candidate Exam Panel
-    function renderQuestions() {
-      candidateAnswers = new Array(approvedQuestions.length).fill(null);
-      const container = document.getElementById('questionsContainer');
-      container.innerHTML = approvedQuestions.map((q, index) => `
-        <div class="question-card">
-          <h3>${index + 1}. ${q.question}</h3>
-          ${q.options.map((opt, i) => `
-            <div class="answer-option" onclick="selectAnswer(${index}, ${i}, this)">${opt}</div>
-          `).join('')}
-        </div>
-      `).join('');
-    }
-
-    // Record Candidate's Selected Answer and apply animation styling
-    function selectAnswer(qIndex, aIndex, element) {
-      candidateAnswers[qIndex] = aIndex;
-      // Remove 'selected' class from all options in this question
-      const options = element.parentElement.querySelectorAll('.answer-option');
-      options.forEach(opt => opt.classList.remove('selected'));
-      // Add 'selected' class to the chosen option
-      element.classList.add('selected');
-    }
-
-    // Submit Exam: Calculate score, highlight answers, notify admin, then return to login panel
-    function submitExam() {
-      clearInterval(timerInterval);
-      let score = 0;
-      const questionCards = document.querySelectorAll('.question-card');
-      approvedQuestions.forEach((q, index) => {
-        const options = questionCards[index].querySelectorAll('.answer-option');
-        options.forEach((opt, i) => {
-          // Mark correct answer with green border
-          if(i === q.correctAnswer) {
-            opt.classList.add('correct');
-          }
-          // Mark candidate's selection as wrong if it doesn't match the correct answer
-          if(candidateAnswers[index] === i && i !== q.correctAnswer) {
-            opt.classList.add('wrong');
-          }
-        });
-        if(candidateAnswers[index] === q.correctAnswer) score++;
-      });
-      notifyAdmin(candidateName, score);
-      alert(`Exam submitted! You scored ${score} out of ${approvedQuestions.length}`);
-      // After a short delay, return to login panel
-      setTimeout(() => {
-        hideAll();
-        document.getElementById('loginSection').classList.remove('hidden');
-      }, 3000);
-    }
-
-    // Display a notification in the login panel for admin review
-    function notifyAdmin(name, score) {
-      const notificationArea = document.getElementById('notificationArea');
-      const notification = document.createElement('div');
-      notification.className = "notification";
-      notification.textContent = `Candidate ${name} scored ${score} out of ${approvedQuestions.length}`;
-      // Prepend notification (latest first)
-      notificationArea.prepend(notification);
-    }
-
-    // Render stored questions in Admin Panel with a remove option
-    function renderAdminQuestions() {
-      const container = document.getElementById('adminQuestions');
-      container.innerHTML = approvedQuestions.map((q, index) => `
-        <div class="question-card">
-          <button class="remove-btn" onclick="removeQuestion(${index})">Remove</button>
-          <h3>${index + 1}. ${q.question}</h3>
-          ${q.options.map(opt => `<p>${opt}</p>`).join('')}
-        </div>
-      `).join('');
-    }
-
-    // Remove question from storage
-    function removeQuestion(index) {
-      if (confirm("Are you sure you want to remove this question?")) {
-        approvedQuestions.splice(index, 1);
-        saveQuestions();
-        renderAdminQuestions();
-      }
-    }
-
-    // Helper function to hide all panels
-    function hideAll() {
-      document.getElementById('loginSection').classList.add('hidden');
-      document.getElementById('candidateSection').classList.add('hidden');
-      document.getElementById('examSection').classList.add('hidden');
-      document.getElementById('adminSection').classList.add('hidden');
-    }
-  </script>
-
-</body>
-  </html>
+    function getDifficultyIcon(difficulty) {
+      switch(difficulty.toLowerCase()) {
+        case "easy": return '<i class="fa-solid fa-face-smile" style="color: #28a745;"></i>';
+        case "medium": return '<i class="fa-solid fa-face-meh" style="color: #ffc107;"></i>';
+        case "hard": return '<i class="fa-solid fa-face-frown" style="color: #dc3545;"></i>';
+        defa
